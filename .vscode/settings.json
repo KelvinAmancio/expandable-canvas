@@ -1,0 +1,12 @@
+{
+  "editor.fontLigatures": true,
+  "editor.fontFamily": "JetBrains Mono",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "files.trimTrailingWhitespace": true,
+  "editor.fontSize": 16,
+  "workbench.colorTheme": "Community Material Theme Darker High Contrast",
+  "editor.minimap.enabled": false,
+  "vetur.format.defaultFormatter.html": "none"
+}
