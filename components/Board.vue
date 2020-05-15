@@ -43,13 +43,13 @@ export default {
       },
       canvasWidth: 1280,
       canvasHeight: 780,
-      zoomLevel: 2.0,
+      zoomLevel: 0,
       zoomLevelMin: -0.9,
       zoomLevelMax: 3.0,
       shiftKeyDown: false,
       ctrlKeyDown: false,
       mouseDownPoint: null,
-      shapes: ['None', 'Square'],
+      shapes: ['None', 'Note'],
       selectedShape: 'None',
       colors: [
         'Black',
@@ -81,26 +81,29 @@ export default {
     this.canvas = new fabric.Canvas('canvas', {
       width: this.canvasWidth,
       height: this.canvasHeight,
-      selectionKey: 'ctrlKey'
+      selectionKey: 'ctrlKey',
+      fireRightClick: true,
+      stopContextMenu: true,
+      preserveObjectStacking: true
     })
 
     const point = new fabric.Point(this.canvasWidth / 2, this.canvasHeight / 2)
     this.canvas.zoomToPoint(point, Math.pow(2, this.zoomLevel))
 
+    this.canvas.on('object:moved', event => {
+      console.log('object moved')
+    })
+    this.canvas.on('object:scaled', event => {
+      console.log('object scaled')
+    })
+
+    this.createNote(point)
+
     this.canvas.on('mouse:down', options => {
       const pointer = this.canvas.getPointer(options.e, true)
 
-      if (this.selectedShape === 'Square') {
-        const pointer = this.canvas.getPointer(options.e, false)
-        const rectangle = new fabric.Rect({
-          left: pointer.x,
-          top: pointer.y,
-          width: 25,
-          height: 25,
-          fill: this.selectedColor
-        })
-        this.canvas.add(rectangle)
-        this.canvas.setActiveObject(rectangle)
+      if (this.selectedShape === 'Note') {
+        this.createNote(pointer)
         this.selectedShape = 'None'
       }
 
@@ -145,11 +148,14 @@ export default {
       } else if (key === 40) {
         // handle Down key
         this.move(this.direction.DOWN)
-      } else if (key === 46) {
+      } /* else if (key === 46) {
         // handle Delete key
         const activeObject = this.canvas.getActiveObject()
-        this.canvas.remove(activeObject)
-      }
+        if (activeObject) {
+          console.log('object marked for removal')
+          this.canvas.remove(activeObject)
+        }
+      } */
     })
 
     fabric.util.addListener(document.body, 'keyup', options => {
@@ -215,6 +221,128 @@ export default {
         this.zoomLevel -= 0.1
         this.canvas.zoomToPoint(point, Math.pow(2, this.zoomLevel))
       }
+    },
+    createNote(point) {
+      const rectangle = new fabric.Rect({
+        left: point.x,
+        top: point.y,
+        width: 290,
+        height: 250,
+        fill: 'white'
+      })
+      rectangle.setShadow('5px 5px 5px rgba(94, 128, 191, 0.5)')
+      const textTitle = new fabric.IText('Type a title...', {
+        left: point.x + 10,
+        top: point.y + 10,
+        fontSize: 23,
+        fill: '#d4d4d4',
+        textEditable: true
+      })
+      const textUpdated = new fabric.Text('Last update: 1 second ago', {
+        left: point.x + 10,
+        top: point.y + 55,
+        fontSize: 14,
+        fill: '#858585'
+      })
+      const circle = new fabric.Circle({
+        radius: 15,
+        fill: 'rgba(0,0,0,0)',
+        left: point.x + 240,
+        top: point.y + 20,
+        stroke: '#1a1a1a',
+        strokeWidth: 1
+      })
+      const textInitials = new fabric.Text('K', {
+        left: point.x + 250,
+        top: point.y + 28,
+        fontSize: 12,
+        fill: '#1a1a1a'
+      })
+      const line = new fabric.Line(
+        [point.x + 10, point.y + 95, point.x + 280, point.y + 95],
+        {
+          stroke: '#d4d4d4',
+          strokeWidth: 1
+        }
+      )
+      const textArea = new fabric.Textbox('Type a title...', {
+        left: point.x + 10,
+        top: point.y + 110,
+        width: 270,
+        height: 85,
+        fontSize: 16,
+        fill: '#5d5d5d',
+        textEditable: true
+      })
+      const colorIcon = document.createElement('img')
+      colorIcon.setAttribute('src', '/black-palette.png')
+      const colorIconFabric = new fabric.Image(colorIcon, {
+        left: point.x + 100,
+        top: point.y + 210,
+        scaleX: 0.7,
+        scaleY: 0.7
+      })
+      const deleteIcon = document.createElement('img')
+      deleteIcon.setAttribute('src', '/black-delete.png')
+      const deleteIconFabric = new fabric.Image(deleteIcon, {
+        left: point.x + 165,
+        top: point.y + 210,
+        scaleX: 0.7,
+        scaleY: 0.7
+      })
+
+      const group = new fabric.Group(
+        [
+          rectangle,
+          textTitle,
+          textUpdated,
+          circle,
+          textInitials,
+          line,
+          textArea,
+          deleteIconFabric,
+          colorIconFabric
+        ],
+        {
+          subTargetCheck: true
+        }
+      )
+      group.on('mousedown', event => {
+        if (event.button === 3) {
+          console.log('mouse right click')
+        }
+
+        const objectSelected = event.subTargets[0]
+        console.log(objectSelected)
+
+        if (objectSelected.textEditable) {
+          group._restoreObjectsState()
+          this.canvas.remove(group)
+          group._objects.forEach(element => {
+            this.canvas.add(element)
+          })
+          this.canvas.renderAll()
+          this.canvas.setActiveObject(objectSelected)
+          objectSelected.enterEditing()
+          objectSelected.selectAll()
+          objectSelected.on('editing:exited', options => {
+            const items = []
+            group._objects.forEach(obj => {
+              items.push(obj)
+              this.canvas.remove(obj)
+            })
+            const grp = new fabric.Group(items, {})
+            this.canvas.add(grp)
+          })
+        }
+      })
+      this.canvas.add(group)
+      console.log(this.canvas.indexOf(group))
+      this.canvas.sendBackwards(group)
+      console.log(this.canvas.indexOf(group))
+      // this.canvas.bringForward(group)
+      // console.log(this.canvas.getObjects().indexOf(group))
+      this.canvas.setActiveObject(group)
     }
   }
 }
