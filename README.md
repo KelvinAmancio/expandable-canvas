@@ -3,15 +3,14 @@
 
 This is a personal project aimed at improve my frontend skills with the VueJS framework, involving the creation of a resizable canvas where users can draw geometric figures.
 
-
 ## Stack
 
 - [VueJS](https://vuejs.org/)
 - [Nuxt](https://nuxt.com/)
 - [Vuetify](https://vuetifyjs.com/)
+- [JavaScript](https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/)
 
-
-## Installing
+## Running
 
 ``` bash
 # install dependencies
