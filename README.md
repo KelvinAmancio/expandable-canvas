@@ -1,8 +1,17 @@
-# expandable-canvas
 
-> My tiptop Nuxt.js project
+# Expandable Canvas
 
-## Build Setup
+This is a personal project aimed at improve my frontend skills with the VueJS framework, involving the creation of a resizable canvas where users can draw geometric figures.
+
+
+## Stack utilizada
+
+- [VueJS](https://vuejs.org/)
+- [Nuxt](https://nuxt.com/)
+- [Vuetify](https://vuetifyjs.com/)
+
+
+## Instalação
 
 ``` bash
 # install dependencies
@@ -18,5 +27,3 @@ $ npm start
 # generate static project
 $ npm run generate
 ```
-
-For detailed explanation on how things work, checkout [Nuxt.js docs](https://nuxtjs.org).
